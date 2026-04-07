@@ -9,13 +9,10 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include <sys/un.h>
 
-#include <hev-task.h>
-#include <hev-task-io-socket.h>
-
 #include "hev-socks5.h"
-#include "hev-socks5-misc.h"
 
 #include "hev-logger.h"
 #include "hev-config.h"
@@ -52,17 +49,14 @@ hev_socks5_session_connect_unix (HevSocks5Session *self, const char *path)
                                             (struct sockaddr *)&addr);
     if (res < 0) {
         LOG_W ("%p socks5 unix bind", self);
-        hev_task_del_fd (hev_task_self (), fd);
         close (fd);
         return -1;
     }
 
-    res = hev_task_io_socket_connect (fd, (struct sockaddr *)&addr,
-                                      sizeof (sa_family_t) + path_len + 1,
-                                      hev_socks5_task_io_yielder, self);
+    res = connect (fd, (struct sockaddr *)&addr,
+                   sizeof (sa_family_t) + path_len + 1);
     if (res < 0) {
         LOG_I ("%p socks5 unix connect", self);
-        hev_task_del_fd (hev_task_self (), fd);
         close (fd);
         return -1;
     }
