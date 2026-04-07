@@ -177,6 +177,7 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
     const char *port = NULL;
     const char *udpm = NULL;
     const char *udpa = NULL;
+    const char *unix_path = NULL;
     const char *user = NULL;
     const char *pass = NULL;
     const char *mark = NULL;
@@ -211,6 +212,8 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
             udpm = value;
         else if (0 == strcmp (key, "udp-address"))
             udpa = value;
+        else if (0 == strcmp (key, "unix"))
+            unix_path = value;
         else if (0 == strcmp (key, "pipeline"))
             pipe = value;
         else if (0 == strcmp (key, "username"))
@@ -221,14 +224,16 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
             mark = value;
     }
 
-    if (!port) {
-        fprintf (stderr, "Can't found socks5.port!\n");
-        return -1;
-    }
+    if (!unix_path) {
+        if (!port) {
+            fprintf (stderr, "Can't found socks5.port!\n");
+            return -1;
+        }
 
-    if (!addr) {
-        fprintf (stderr, "Can't found socks5.address!\n");
-        return -1;
+        if (!addr) {
+            fprintf (stderr, "Can't found socks5.address!\n");
+            return -1;
+        }
     }
 
     if ((user && !pass) || (!user && pass)) {
@@ -236,8 +241,12 @@ hev_config_parse_socks5 (yaml_document_t *doc, yaml_node_t *base)
         return -1;
     }
 
-    strncpy (srv.addr, addr, 256 - 1);
-    srv.port = strtoul (port, NULL, 10);
+    if (addr)
+        strncpy (srv.addr, addr, 256 - 1);
+    if (port)
+        srv.port = strtoul (port, NULL, 10);
+    if (unix_path)
+        strncpy (srv.unix_path, unix_path, 108 - 1);
 
     if (pipe && (strcasecmp (pipe, "true") == 0))
         srv.pipeline = 1;
