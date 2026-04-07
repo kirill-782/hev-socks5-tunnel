@@ -17,10 +17,12 @@ tunnel:
 # pre-down-script: down.sh
 
 socks5:
-  # Socks5 server port
+  # Socks5 server port (required for TCP/IP upstream)
   port: 1080
-  # Socks5 server address (ipv4/ipv6)
+  # Socks5 server address (ipv4/ipv6, required for TCP/IP upstream)
   address: 127.0.0.1
+  # Socks5 server unix domain socket path (alternative to address/port)
+# unix: '/var/run/hev-socks5-server.sock'
   # Socks5 UDP relay mode (tcp|udp)
   udp: 'udp'
   # Override the UDP address provided by the Socks5 server (ipv4/ipv6)
